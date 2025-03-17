@@ -3,6 +3,9 @@ from MOL_UAE.items import Product
 from lxml import html
 import json
 import copy
+import os
+import pandas as pd
+
 
 class Mol_uaeSpider(scrapy.Spider):
     name = "MOL_UAE"
@@ -36,15 +39,22 @@ class Mol_uaeSpider(scrapy.Spider):
             'labourCardNo': '',
             'passportNo': 'F5110797',
         }
-        url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
-        yield scrapy.Request(
-            url,
-            headers=headers,
-            # json=json_data,
-            body=json.dumps(json_data),
-            callback=self.parse_product,
-            method='POST',
-        )
+        script_directory = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(script_directory, "EID_CHECK.csv")
+        df = pd.read_csv(file_path)
+        for item in df.to_dict('records'):
+            passport_no = item.get('Passport No').replace(' ', '').strip()
+            json_data['passportNo'] = passport_no
+            url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
+            yield scrapy.Request(
+                url,
+                headers=headers,
+                # json=json_data,
+                body=json.dumps(json_data),
+                callback=self.parse_product,
+                method='POST',
+            )
+            # return
 
     def parse_product(self, response):
         # item = response.json()
@@ -54,7 +64,11 @@ class Mol_uaeSpider(scrapy.Spider):
         #     print('-----', items)
         #     product_data_list.append(items)
         #     return
-        item = response.json()[0]
+        try:
+            item = response.json()[0]
+        except Exception as e:
+            print(e)
+            return
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Language': 'en-US,en;q=0.9',
