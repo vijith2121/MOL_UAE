@@ -32,8 +32,9 @@ class Mol_uaeSpider(scrapy.Spider):
             'pageNumber': 1,
             'pageSize': 10,
             'name': '',
-            'labourCardNo': '81982017',
-            'passportNo': '',
+            # 'labourCardNo': '81982017',
+            'labourCardNo': '',
+            'passportNo': 'F5110797',
         }
         url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
         yield scrapy.Request(
@@ -46,7 +47,14 @@ class Mol_uaeSpider(scrapy.Spider):
         )
 
     def parse_product(self, response):
-        product_data = response.json()
+        # item = response.json()
+
+        # product_data_list = []
+        # for items in response.json():
+        #     print('-----', items)
+        #     product_data_list.append(items)
+        #     return
+        item = response.json()[0]
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -71,36 +79,42 @@ class Mol_uaeSpider(scrapy.Spider):
             'pageSize': 10,
             'personCode': '11816018303154',
         }
-        for item in product_data:
-            nameAr = item.get('nameAr', None)
-            nameEn = item.get('nameEn', None)
-            gender = item.get('gender', None)
-            nationality = item.get('nationality', None)
-            personCode = item.get('personCode', None)
-            date_of_birth = item.get('dob', None)
-            data = {
-                'name_Ar': nameAr,
-                'name_En': nameEn,
-                'gender': gender,
-                'nationality': nationality,
-                'personCode': personCode,
-                'date_of_birth': date_of_birth,
-            }
-            api_url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonCompanies'
-            json_data['personCode'] = f'{personCode}'
-            yield scrapy.Request(
-                api_url,
-                headers=headers,
-                meta=data,
-                body=json.dumps(json_data),
-                callback=self.parse_product_data,
-                method='POST',
+        # for item in product_data_list:
+        nameAr = item.get('nameAr', None)
+        nameEn = item.get('nameEn', None)
+        gender = item.get('gender', None)
+        nationality = item.get('nationality', None)
+        personCode = item.get('personCode', None)
+        date_of_birth = item.get('dob', None)
+        data = {
+            'name_Ar': nameAr,
+            'name_En': nameEn,
+            'gender': gender,
+            'nationality': nationality,
+            'personCode': personCode,
+            'date_of_birth': date_of_birth,
+            'extra_data': response.json()
+        }
+        api_url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonCompanies'
+        json_data['personCode'] = f'{personCode}'
+        yield scrapy.Request(
+            api_url,
+            headers=headers,
+            meta=data,
+            body=json.dumps(json_data),
+            callback=self.parse_product_data,
+            method='POST',
 
-            )
+        )
 
     def parse_product_data(self, response):
         product_data = response.json()[0]
         meta_data = response.meta
+        extra_datas = meta_data.get('extra_data', [])
+        if not isinstance(extra_datas, list):
+            extra_datas = [extra_datas]
+        extra_datas.extend(response.json())
+
         companyCode = product_data.get('companyCode', None)
         Company_name_En = product_data.get('nameEn', None)
         Company_name_Ar = product_data.get('nameAr', None)
@@ -116,6 +130,7 @@ class Mol_uaeSpider(scrapy.Spider):
         meta_data['cardStartDate'] = cardStartDate
         meta_data['cardEndDate'] = cardEndDate
         meta_data['cardType'] = cardType
+        meta_data['extra_data'] = extra_datas
         meta_data.pop("depth", None)
         meta_data.pop("download_timeout", None)
         meta_data.pop("download_slot", None)
@@ -134,5 +149,6 @@ class Mol_uaeSpider(scrapy.Spider):
             'cardStartDate': cardStartDate,
             'cardEndDate': cardEndDate,
             'cardType': cardType,
+            'extra_data': extra_datas
         }
         yield Product(**items)
