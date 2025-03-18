@@ -3,9 +3,9 @@ from MOL_UAE.items import Product
 from lxml import html
 import json
 import copy
+from datetime import datetime
 import os
 import pandas as pd
-
 
 class Mol_uaeSpider(scrapy.Spider):
     name = "MOL_UAE"
@@ -28,7 +28,6 @@ class Mol_uaeSpider(scrapy.Spider):
             'sec-ch-ua': '"Not:A-Brand";v="24", "Chromium";v="134"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Linux"',
-            # 'Cookie': 'ASP.NET_SessionId=ncbcomwoadn1ldkm3nipjobq; ADRUM_BTa=R:0|g:8ee13b72-5606-413c-95c1-08ce6ba377a6|n:mohre_0a9b3c27-4648-4b8d-9c9c-591021814a68; SameSite=None; ADRUM_BT1=R:0|i:28664|e:95',
         }
 
         json_data = {
@@ -57,13 +56,7 @@ class Mol_uaeSpider(scrapy.Spider):
             # return
 
     def parse_product(self, response):
-        # item = response.json()
-
-        # product_data_list = []
-        # for items in response.json():
-        #     print('-----', items)
-        #     product_data_list.append(items)
-        #     return
+        item = response.json()
         try:
             item = response.json()[0]
         except Exception as e:
@@ -85,7 +78,6 @@ class Mol_uaeSpider(scrapy.Spider):
             'sec-ch-ua': '"Not:A-Brand";v="24", "Chromium";v="134"',
             'sec-ch-ua-mobile': '?0',
             'sec-ch-ua-platform': '"Linux"',
-            # 'Cookie': 'ASP.NET_SessionId=ncbcomwoadn1ldkm3nipjobq; ADRUM_BTa=R:78|g:e37cb677-5e5c-4e30-baef-5ad16cb2ae7e|n:mohre_0a9b3c27-4648-4b8d-9c9c-591021814a68; SameSite=None; ADRUM_BT1=R:78|i:28664|e:42; PersonCode=11816018303154',
         }
 
         json_data = {
@@ -122,7 +114,19 @@ class Mol_uaeSpider(scrapy.Spider):
         )
 
     def parse_product_data(self, response):
-        product_data = response.json()[0]
+        product_list = response.json()
+        date_format = "%d/%m/%Y"
+        valid_products = [p for p in product_list if p.get('cardStartDate')]
+        
+        if not valid_products:
+            return []  # No valid dates found
+        
+        # Get the most recent date
+        recent_date = max(valid_products, key=lambda x: datetime.strptime(x['cardStartDate'], date_format))['cardStartDate']
+        
+        # Collect records with the most recent date
+        product_data = [p for p in valid_products if p['cardStartDate'] == recent_date][0]
+        # product_data = response.json()[0]
         meta_data = response.meta
         extra_datas = meta_data.get('extra_data', [])
         if not isinstance(extra_datas, list):
