@@ -43,12 +43,20 @@ class Mol_uaeSpider(scrapy.Spider):
         df = pd.read_csv(file_path)
         for item in df.to_dict('records'):
             passport_no = item.get('Passport No').replace(' ', '').strip()
+            cif = str(item.get('CIF')).replace(' ', '').strip()
+            emirates_id = item.get('Emiratesid').replace(' ', '').replace('-', '').strip()
             json_data['passportNo'] = passport_no
             url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
+            input_data = {
+                'passport_no': passport_no,
+                'cif': cif,
+                'emirates_id': emirates_id
+            }
             yield scrapy.Request(
                 url,
                 headers=headers,
                 # json=json_data,
+                meta = input_data,
                 body=json.dumps(json_data),
                 callback=self.parse_product,
                 method='POST',
@@ -62,6 +70,7 @@ class Mol_uaeSpider(scrapy.Spider):
         except Exception as e:
             print(e)
             return
+        meta_data = response.meta
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Language': 'en-US,en;q=0.9',
@@ -99,7 +108,10 @@ class Mol_uaeSpider(scrapy.Spider):
             'nationality': nationality,
             'personCode': personCode,
             'date_of_birth': date_of_birth,
-            'extra_data': response.json()
+            'extra_data': response.json(),
+            'passport_no': meta_data.get('passport_no', None),
+            'cif': meta_data.get('cif', None),
+            'emirates_id': meta_data.get('emirates_id', None),
         }
         api_url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonCompanies'
         json_data['personCode'] = f'{personCode}'

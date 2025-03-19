@@ -2,6 +2,9 @@ import scrapy
 
 
 class Product(scrapy.Item):
+    passport_no = scrapy.Field()
+    cif = scrapy.Field()
+    emirates_id = scrapy.Field()
     nameAr = scrapy.Field()
     nameEn = scrapy.Field()
     gender = scrapy.Field()          # Added gender field
