@@ -39,18 +39,20 @@ class Mol_uaeSpider(scrapy.Spider):
             'passportNo': 'F5110797',
         }
         script_directory = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(script_directory, "EID_CHECK.csv")
+        file_path = os.path.join(script_directory, "MOL_UAE2.csv")
         df = pd.read_csv(file_path)
         for item in df.to_dict('records'):
-            passport_no = item.get('Passport No').replace(' ', '').strip()
-            cif = str(item.get('CIF')).replace(' ', '').strip()
-            emirates_id = item.get('Emiratesid').replace(' ', '').replace('-', '').strip()
+            passport_no = item.get('Passport No.').replace(' ', '').strip()
+            cif = str(item.get('CIF', '')).replace(' ', '').strip()
+            CIS_CID_No = str(item.get('CIS/CID No.')).replace(' ', '').strip()
+            emirates_id = item.get('EID Number').replace(' ', '').replace('-', '').strip()
             json_data['passportNo'] = passport_no
             url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
             input_data = {
                 'passport_no': passport_no,
                 'cif': cif,
-                'emirates_id': emirates_id
+                'emirates_id': emirates_id,
+                'CIS_CID_No': CIS_CID_No
             }
             yield scrapy.Request(
                 url,
@@ -112,6 +114,7 @@ class Mol_uaeSpider(scrapy.Spider):
             'passport_no': meta_data.get('passport_no', None),
             'cif': meta_data.get('cif', None),
             'emirates_id': meta_data.get('emirates_id', None),
+            'CIS_CID_No': meta_data.get('CIS_CID_No', None)
         }
         api_url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonCompanies'
         json_data['personCode'] = f'{personCode}'
@@ -183,5 +186,6 @@ class Mol_uaeSpider(scrapy.Spider):
             'passport_no': meta_data.get('passport_no', None),
             'cif': meta_data.get('cif', None),
             'emirates_id': meta_data.get('emirates_id', None),
+            'CIS_CID_No': meta_data.get('CIS_CID_No', None)
         }
         yield Product(**items)

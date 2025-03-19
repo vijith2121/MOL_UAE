@@ -2,6 +2,7 @@ import scrapy
 
 
 class Product(scrapy.Item):
+    CIS_CID_No = scrapy.Field()
     passport_no = scrapy.Field()
     cif = scrapy.Field()
     emirates_id = scrapy.Field()
