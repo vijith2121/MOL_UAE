@@ -179,6 +179,9 @@ class Mol_uaeSpider(scrapy.Spider):
             'cardStartDate': cardStartDate,
             'cardEndDate': cardEndDate,
             'cardType': cardType,
-            'extra_data': extra_datas
+            'extra_data': extra_datas,
+            'passport_no': meta_data.get('passport_no', None),
+            'cif': meta_data.get('cif', None),
+            'emirates_id': meta_data.get('emirates_id', None),
         }
         yield Product(**items)
