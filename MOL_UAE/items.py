@@ -20,3 +20,4 @@ class Product(scrapy.Item):
     cardEndDate = scrapy.Field()
     cardType = scrapy.Field()
     extra_data = scrapy.Field()
+    scrape_date = scrapy.Field()

@@ -39,7 +39,7 @@ class Mol_uaeSpider(scrapy.Spider):
             'passportNo': 'F5110797',
         }
         script_directory = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(script_directory, "split_part_2.csv")
+        file_path = os.path.join(script_directory, "split_part_3.csv")
         df = pd.read_csv(file_path)
         for item in df.to_dict('records'):
             passport_no = item.get('Passport No.').replace(' ', '').strip()
@@ -168,6 +168,7 @@ class Mol_uaeSpider(scrapy.Spider):
         meta_data.pop("download_timeout", None)
         meta_data.pop("download_slot", None)
         meta_data.pop("download_latency", None)
+        scrape_date = date.today()
         items = {
             'nameAr': ''.join(meta_data.get('name_Ar', '')).strip(),
             'nameEn': meta_data.get('name_En', None),
@@ -186,6 +187,7 @@ class Mol_uaeSpider(scrapy.Spider):
             'passport_no': meta_data.get('passport_no', None),
             'cif': meta_data.get('cif', None),
             'emirates_id': meta_data.get('emirates_id', None),
-            'CIS_CID_No': meta_data.get('CIS_CID_No', None)
+            'CIS_CID_No': meta_data.get('CIS_CID_No', None),
+            'scrape_date': str(scrape_date)
         }
         yield Product(**items)
