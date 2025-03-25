@@ -3,6 +3,7 @@ from MOL_UAE.items import Product
 from lxml import html
 import json
 import copy
+from datetime import date
 from datetime import datetime
 import os
 import pandas as pd
