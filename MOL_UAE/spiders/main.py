@@ -40,7 +40,7 @@ class Mol_uaeSpider(scrapy.Spider):
             'passportNo': 'F5110797',
         }
         script_directory = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(script_directory, "split_part_2.csv")
+        file_path = os.path.join(script_directory, "split_part_3.csv")
         df = pd.read_csv(file_path)
         for item in df.to_dict('records'):
             passport_no = str(item.get('Passport_No__c')).replace(' ', '').strip()
