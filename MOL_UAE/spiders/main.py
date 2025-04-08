@@ -40,13 +40,14 @@ class Mol_uaeSpider(scrapy.Spider):
             'passportNo': 'F5110797',
         }
         script_directory = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(script_directory, "ENBD_Indian_Base_File.csv")
+        file_path = os.path.join(script_directory, "ADCB_UAE_2025-04-08.csv")
         df = pd.read_csv(file_path)
         for item in df.to_dict('records'):
-            passport_no = str(item.get('PASSPORTNO')).replace(' ', '').strip()
+
+            passport_no = str(item.get('passport_no')).replace(' ', '').strip()
             cif = str(item.get('CIF', '')).replace(' ', '').strip()
             CIS_CID_No = str(item.get('CIS_No__c')).replace(' ', '').strip()
-            emirates_id = str(item.get('EID_Number__c')).replace(' ', '').replace('-', '').strip()
+            emirates_id = str(item.get('emirates_id')).replace(' ', '').replace('-', '').strip()
             json_data['passportNo'] = passport_no
             url = 'https://mobilebeta.mohre.gov.ae/Mohre.Complaints.App/TwafouqAnonymous/GetPersonList'
             input_data = {
